@@ -2,9 +2,9 @@ package todolist
 
 import todolist.models._
 
-class ToDoList extends ToDoListStack {
+class ToDoList(implicit val tasks: List[Task]) extends ToDoListStack {
 
-  get("/") {
-    Message("Hello, world!")
+  get("/tasks") {
+    tasks
   }
 }
