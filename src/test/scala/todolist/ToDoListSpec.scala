@@ -7,7 +7,10 @@ import todolist.models.{TaskData, Task}
 import org.scalatest.BeforeAndAfter
 
 class ToDoListSpec extends ScalatraSpec with BeforeAndAfter {
+
   addServlet(classOf[ToDoList], "/*")
+
+  protected implicit val jsonFormats: Formats = DefaultFormats
 
   val originalTaskData: List[Task] = TaskData.all
 
@@ -47,7 +50,30 @@ class ToDoListSpec extends ScalatraSpec with BeforeAndAfter {
     }
   }
 
+  describe("POST /tasks on ToDoList") {
+    it("should return status 200") {
+      post("/tasks", testTaskJson, jsonContentType) {
+        status should be(200)
+      }
+    }
+
+    it("should save posted data") {
+      clearTaskData()
+      post("/tasks", testTaskJson, jsonContentType) {
+        TaskData.all should contain (testTask)
+      }
+    }
+  }
+
+  val jsonContentType = Map("Content-Type" -> "application/json")
+  val testTaskJson = """{ "text": "test", "done": false }"""
+  val testTask = parse(testTaskJson).extract[Task]
+
   def setTestTaskData(): Unit = {
-    TaskData.all = List(Task("test", done = false))
+    TaskData.all = List(testTask)
+  }
+
+  def clearTaskData(): Unit = {
+    TaskData.all = List()
   }
 }
