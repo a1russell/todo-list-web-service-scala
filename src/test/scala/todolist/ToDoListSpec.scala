@@ -7,22 +7,23 @@ import todolist.models.{TaskData, Task}
 import org.scalatest.BeforeAndAfter
 
 class ToDoListSpec extends ScalatraSpec with BeforeAndAfter {
-  var toDoList: ToDoList = _
+  addServlet(classOf[ToDoList], "/*")
+
+  val originalTaskData: List[Task] = TaskData.all
 
   after {
-    removeServlets()
+    TaskData.all = originalTaskData
   }
 
   describe("GET /tasks on ToDoList") {
     it("should return status 200") {
-      addToDoListServlet()
       get("/tasks") {
         status should be (200)
       }
     }
 
     it("should return a list") {
-      addTodoListServletWithTask()
+      setTestTaskData()
       get("/tasks") {
         val json = parse(body)
         json.getClass should be (classOf[JArray])
@@ -30,7 +31,7 @@ class ToDoListSpec extends ScalatraSpec with BeforeAndAfter {
     }
 
     it("should return task with value for text") {
-      addTodoListServletWithTask()
+      setTestTaskData()
       get("/tasks") {
         val json = parse(body)
         json \ "text" should be (JString("test"))
@@ -38,7 +39,7 @@ class ToDoListSpec extends ScalatraSpec with BeforeAndAfter {
     }
 
     it("should return task with value for done") {
-      addTodoListServletWithTask()
+      setTestTaskData()
       get("/tasks") {
         val json = parse(body)
         json \ "done" should be (JBool(value = false))
@@ -46,18 +47,7 @@ class ToDoListSpec extends ScalatraSpec with BeforeAndAfter {
     }
   }
 
-  def addTodoListServletWithTask(): Unit = {
-    val tasks = List(Task("test", done = false))
-    addToDoListServlet(tasks)
-  }
-
-  def addToDoListServlet(tasks: List[Task] = TaskData.all): Unit = {
-    implicit val _tasks: List[Task] = tasks
-    toDoList = new ToDoList
-    addServlet(toDoList, "/*")
-  }
-
-  def removeServlets() = {
-    servletContextHandler.getServletHandler.setServletMappings(Array())
+  def setTestTaskData(): Unit = {
+    TaskData.all = List(Task("test", done = false))
   }
 }
