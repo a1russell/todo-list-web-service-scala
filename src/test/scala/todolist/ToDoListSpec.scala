@@ -94,6 +94,31 @@ class ToDoListSpec extends ScalatraSpec with BeforeAndAfter {
     }
   }
 
+  describe("POST /tasks/purge on ToDoList") {
+    it("should return status 200") {
+      post("/tasks/purge", "", jsonContentType) {
+        status should be(200)
+      }
+    }
+
+    it("should purge tasks that are done") {
+      setDoneTestTaskData()
+      post("/tasks/purge", "", jsonContentType) {
+        TaskData.all should not contain testDoneTask
+      }
+    }
+
+    it("should keep tasks that are not done") {
+      val incompleteTask = Task("incomplete task", done = false)
+      val completeTask = Task("complete task", done = true)
+      TaskData.all = List(incompleteTask, completeTask)
+
+      post("/tasks/purge", "", jsonContentType) {
+        TaskData.all should contain (incompleteTask)
+      }
+    }
+  }
+
   val jsonContentType = Map("Content-Type" -> "application/json")
   val testTaskJson = """{ "text": "test", "done": false }"""
   val testTask = parse(testTaskJson).extract[Task]
@@ -102,6 +127,10 @@ class ToDoListSpec extends ScalatraSpec with BeforeAndAfter {
 
   def setTestTaskData(): Unit = {
     TaskData.all = List(testTask)
+  }
+
+  def setDoneTestTaskData(): Unit = {
+    TaskData.all = List(testDoneTask)
   }
 
   def clearTaskData(): Unit = {

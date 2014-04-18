@@ -22,4 +22,8 @@ class ToDoList extends ToDoListStack {
       }
     }
   }
+
+  post("/tasks/purge") {
+    TaskData.all = TaskData.all.filterNot(task => task.done)
+  }
 }
