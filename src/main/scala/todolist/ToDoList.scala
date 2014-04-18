@@ -10,6 +10,7 @@ class ToDoList extends ToDoListStack {
 
   post("/tasks") {
     TaskData.all = parsedBody.extract[Task] +: TaskData.all
+    ()
   }
 
   post("/tasks/update") {
@@ -21,9 +22,11 @@ class ToDoList extends ToDoListStack {
         task
       }
     }
+    ()
   }
 
   post("/tasks/purge") {
     TaskData.all = TaskData.all.filterNot(task => task.done)
+    ()
   }
 }
