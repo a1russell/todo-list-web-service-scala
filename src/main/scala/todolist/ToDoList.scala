@@ -9,7 +9,7 @@ class ToDoList extends ToDoListStack {
   }
 
   post("/tasks") {
-    TaskData.all = parsedBody.extract[Task] :: TaskData.all
+    TaskData.all = parsedBody.extract[Task] +: TaskData.all
   }
 
   post("/tasks/update") {
