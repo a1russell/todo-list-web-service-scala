@@ -65,9 +65,40 @@ class ToDoListSpec extends ScalatraSpec with BeforeAndAfter {
     }
   }
 
+  describe("POST /tasks/update on ToDoList") {
+    it("should return status 200") {
+      post("/tasks/update", testDoneTaskJson, jsonContentType) {
+        status should be(200)
+      }
+    }
+
+    it("should save posted data") {
+      setTestTaskData()
+      post("/tasks/update", testDoneTaskJson, jsonContentType) {
+        TaskData.all should contain (testDoneTask)
+      }
+    }
+
+    it("should not append posted data") {
+      setTestTaskData()
+      post("/tasks/update", testDoneTaskJson, jsonContentType) {
+        TaskData.all should not contain testTask
+      }
+    }
+
+    it("should have no effect if task does not exist") {
+      clearTaskData()
+      post("/tasks/update", testDoneTaskJson, jsonContentType) {
+        TaskData.all should not contain testDoneTask
+      }
+    }
+  }
+
   val jsonContentType = Map("Content-Type" -> "application/json")
   val testTaskJson = """{ "text": "test", "done": false }"""
   val testTask = parse(testTaskJson).extract[Task]
+  val testDoneTaskJson = """{ "text": "test", "done": true }"""
+  val testDoneTask = parse(testDoneTaskJson).extract[Task]
 
   def setTestTaskData(): Unit = {
     TaskData.all = List(testTask)
